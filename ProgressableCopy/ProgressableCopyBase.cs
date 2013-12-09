@@ -8,7 +8,8 @@ namespace ProgressableCopy
 {
     public abstract class ProgressableCopyBase
     {
-        protected readonly int _bufferSize = 1024 * 1024;// * 4;  // 4 MiB copy buffer
+        // 16k copy buffer see http://stackoverflow.com/questions/3033771/file-io-with-streams-best-memory-buffer-size
+        public readonly int BufferSize = 1024 * 1024;
         protected Object _lock = new Object();
 
         public event EventHandler<BytesChangedEventArgs> BytesChanged;

@@ -236,6 +236,8 @@ namespace ProgressableCopy
             copier.BytesChanged += (s, e) =>
             {
                 _copiedBytes = offset + e.CopiedBytes;
+                args.SourcePath = e.SourcePath;
+                args.DestinationPath = e.DestinationPath;
                 args.CopiedBytes = _copiedBytes;
                 RaiseBytesChanged(this, args);
             };
@@ -243,7 +245,7 @@ namespace ProgressableCopy
             {
                 if (!e.Successful)
                 {
-                    Console.WriteLine("ERROR while copying {0}: {1}", copier.SourcePath, e.Exception.Message);
+                    Console.WriteLine("ERROR while copying {0}: {1}", (s as IProgressableCopy).SourcePath, e.Exception.Message);
                 }
             };
             copier.Copy();

@@ -121,7 +121,7 @@ namespace ProgressableCopy
                         using (Stream input = _sourceInfo.OpenRead())
                         {
                             int bytesRead;
-                            byte[] buffer = new byte[base._bufferSize];
+                            byte[] buffer = new byte[base.BufferSize];
                             BytesChangedEventArgs args = new BytesChangedEventArgs()
                             {
                                 SourcePath = this.SourcePath,
