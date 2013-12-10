@@ -116,28 +116,12 @@ namespace ProgressableCopy
                     if (CreateDirectory && !_destinationInfo.Directory.Exists)
                         _destinationInfo.Directory.Create();
 
-                    using (Stream output = File.Open(DestinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        using (Stream input = _sourceInfo.OpenRead())
-                        {
-                            int bytesRead;
-                            byte[] buffer = new byte[base.BufferSize];
-                            BytesChangedEventArgs args = new BytesChangedEventArgs()
-                            {
-                                SourcePath = this.SourcePath,
-                                DestinationPath = this.DestinationPath,
-                                CopiedBytes = _copiedBytes,
-                                TotalBytes = this.TotalBytes
-                            };
-                            while ((bytesRead = input.Read(buffer, 0, buffer.Length)) > 0)
-                            {
-                                output.Write(buffer, 0, bytesRead);
-                                _copiedBytes += bytesRead;
-                                args.CopiedBytes = _copiedBytes;
-                                RaiseBytesChanged(this, args);
-                            }
-                        }
-                    }
+                    int pbCancel = 0;
+                    
+                    NativeCopy.CopyFileEx(SourcePath, DestinationPath,
+                        new NativeCopy.CopyProgressRoutine(this.CopyProgressHandler), IntPtr.Zero,
+                        ref pbCancel, CopyFileFlags.COPY_FILE_NO_BUFFERING);
+
                     RaiseCompleted(this, new CompletedEventArgs() { Successful = true });
                 }
                 catch (Exception ex)
@@ -150,6 +134,21 @@ namespace ProgressableCopy
         #endregion
 
         #region Helper Methods
+
+        private CopyProgressResult CopyProgressHandler(long total, long transferred, long streamSize,
+            long StreamByteTrans, uint dwStreamNumber, CopyProgressCallbackReason reason,
+            IntPtr hSourceFile, IntPtr hDestinationFile, IntPtr lpData)
+        {
+            var args = new BytesChangedEventArgs()
+            {
+                SourcePath = this.SourcePath,
+                DestinationPath = this.DestinationPath,
+                CopiedBytes = transferred,
+                TotalBytes = total
+            };
+            RaiseBytesChanged(this, args);
+            return CopyProgressResult.PROGRESS_CONTINUE;
+        }
 
         private void Reset()
         {

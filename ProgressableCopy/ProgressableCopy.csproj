@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="DirectoryProgressableCopy.cs" />
     <Compile Include="IProgressableCopy.cs" />
+    <Compile Include="NativeCopy.cs" />
     <Compile Include="ProgressableCopyBase.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

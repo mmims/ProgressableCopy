@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -13,21 +14,18 @@ namespace ProgressableCopy
 
         static void Main(string[] args)
         {
-            var stopwatch = new System.Diagnostics.Stopwatch();
-            stopwatch.Start();
-            System.IO.File.Copy(@"C:\swimpe_x86\media\sources\boot.wim", @"Y:\swimpe_test\boot.wim");
-            stopwatch.Stop();
-            Console.WriteLine("Diagnostics: {0} ms", stopwatch.ElapsedMilliseconds);
-            //SFCopy();
+            //var stopwatch = new System.Diagnostics.Stopwatch();
+            //stopwatch.Start();
+            //System.IO.File.Copy(@"C:\swimpe_x86\media\sources\boot.wim", @"C:\swimpe_test\boot.wim");
+            //stopwatch.Stop();
+            //Console.WriteLine("Diagnostics: {0} ms", stopwatch.ElapsedMilliseconds);
+            SFCopy();
             //DCopy();
             Console.ReadKey();
         }
 
         static void DCopy()
         {
-            var di = new System.IO.DirectoryInfo(@"C:\swimpe_x86");
-            var fi = new System.IO.FileInfo(@"C:\swimpe_x86\export.cmd");
-            
             var stopwatch = new System.Diagnostics.Stopwatch();
             dc.SourcePath = @"C:\swimpe_x86";
             dc.DestinationPath = @"y:\swimpe_test";
@@ -82,7 +80,6 @@ namespace ProgressableCopy
                 }
                 Console.CursorVisible = true;
             };
-
             Console.CursorVisible = false;
             stopwatch.Start();
             sfc.Copy();            
