@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using System.Text;
 
 namespace ProgressableCopy
@@ -117,10 +119,29 @@ namespace ProgressableCopy
                         _destinationInfo.Directory.Create();
 
                     int pbCancel = 0;
+                    CopyFileFlags flags = CopyFileFlags.COPY_FILE_NO_BUFFERING;
                     
-                    NativeCopy.CopyFileEx(SourcePath, DestinationPath,
-                        new NativeCopy.CopyProgressRoutine(this.CopyProgressHandler), IntPtr.Zero,
-                        ref pbCancel, CopyFileFlags.COPY_FILE_NO_BUFFERING);
+                    if (_sourceInfo.Length >= 2147483648)  // Don't use buffering for files 2GB or larger
+                        flags = CopyFileFlags.COPY_FILE_NO_BUFFERING;
+                    
+                    var args = new BytesChangedEventArgs()
+                    {
+                        SourcePath = this.SourcePath,
+                        DestinationPath = this.DestinationPath,
+                        CopiedBytes = _copiedBytes,
+                        TotalBytes = this.TotalBytes
+                    };
+                    GCHandle hArgs = GCHandle.Alloc(args);
+
+                    new FileIOPermission(FileIOPermissionAccess.Read, SourcePath).Demand();
+                    new FileIOPermission(FileIOPermissionAccess.Write, DestinationPath).Demand();
+
+                    if (!NativeCopy.CopyFileEx(SourcePath, DestinationPath,
+                        new NativeCopy.CopyProgressRoutine(this.CopyProgressHandler), GCHandle.ToIntPtr(hArgs),
+                        ref pbCancel, flags))
+                    {
+                        throw new IOException(new System.ComponentModel.Win32Exception().Message);
+                    }
 
                     RaiseCompleted(this, new CompletedEventArgs() { Successful = true });
                 }
@@ -139,13 +160,9 @@ namespace ProgressableCopy
             long StreamByteTrans, uint dwStreamNumber, CopyProgressCallbackReason reason,
             IntPtr hSourceFile, IntPtr hDestinationFile, IntPtr lpData)
         {
-            var args = new BytesChangedEventArgs()
-            {
-                SourcePath = this.SourcePath,
-                DestinationPath = this.DestinationPath,
-                CopiedBytes = transferred,
-                TotalBytes = total
-            };
+            GCHandle hArgs = GCHandle.FromIntPtr(lpData);
+            BytesChangedEventArgs args = (hArgs.Target as BytesChangedEventArgs);
+            args.CopiedBytes = transferred;
             RaiseBytesChanged(this, args);
             return CopyProgressResult.PROGRESS_CONTINUE;
         }
