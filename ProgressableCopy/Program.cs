@@ -14,11 +14,6 @@ namespace ProgressableCopy
 
         static void Main(string[] args)
         {
-            //var stopwatch = new System.Diagnostics.Stopwatch();
-            //stopwatch.Start();
-            //System.IO.File.Copy(@"C:\swimpe_x86\media\sources\boot.wim", @"C:\swimpe_test\boot.wim");
-            //stopwatch.Stop();
-            //Console.WriteLine("Diagnostics: {0} ms", stopwatch.ElapsedMilliseconds);
             //SFCopy();
             DCopy();
             Console.ReadKey();
@@ -27,8 +22,8 @@ namespace ProgressableCopy
         static void DCopy()
         {
             var stopwatch = new System.Diagnostics.Stopwatch();
-            dc.SourcePath = @"C:\swimpe_x86";
-            dc.DestinationPath = @"Y:\swimpe_test";
+            dc.SourcePath = @"C:\test";
+            dc.DestinationPath = @"Y:\test_test";
             dc.CreateDirectory = true;
             //dc.Overwrite = true;
             dc.BytesChanged += (s, e) =>
@@ -52,16 +47,15 @@ namespace ProgressableCopy
             Console.CursorVisible = false;
             stopwatch.Start();
             dc.Copy();
-
         }
 
         static void SFCopy()
         {
             var stopwatch = new System.Diagnostics.Stopwatch();
-            sfc.SourcePath = @"C:\swimpe_x86\media\sources\boot.wim";
-            sfc.DestinationPath = @"Y:\swimpe_test\boot.wim";
-            //sfc.Overwrite = true;
+            sfc.SourcePath = @"C:\test\a_large_file.dat";
+            sfc.DestinationPath = @"Y:\test_test\a_large_file.dat";
             sfc.CreateDirectory = true;
+            //sfc.Overwrite = true;            
             sfc.BytesChanged += (s, e) =>
             {
                 PrintProgress(e);
