@@ -120,7 +120,7 @@ namespace ProgressableCopy
 
                     int pbCancel = 0;
                     CopyFileFlags flags = 0;
-                    
+
                     if (_sourceInfo.Length >= 2147483648)  // Don't use buffering for files 2GB or larger
                         flags = CopyFileFlags.COPY_FILE_NO_BUFFERING;
                     

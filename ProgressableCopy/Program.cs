@@ -9,34 +9,47 @@ namespace ProgressableCopy
 {
     class Program
     {
-        static FileProgressableCopy sfc = new FileProgressableCopy();
-        static DirectoryProgressableCopy dc = new DirectoryProgressableCopy();
-
         static void Main(string[] args)
         {
-            //SFCopy();
-            DCopy();
+            if (args.Count() == 2)
+            {
+                if (Directory.Exists(args[0]))
+                {
+                    DCopy(args[0], args[1]);
+                }
+                else
+                {
+                    SFCopy(args[0], args[1]);
+                }
+            }
+            else
+            {
+                Console.WriteLine("ERROR: Invalid arguments.");
+            }
+#if DEBUG
             Console.ReadKey();
+#endif
         }
 
-        static void DCopy()
+        static void DCopy(string source, string destination)
         {
-            var stopwatch = new System.Diagnostics.Stopwatch();
-            dc.SourcePath = @"C:\test";
-            dc.DestinationPath = @"Y:\test_test";
+            var sw = new System.Diagnostics.Stopwatch();
+            var dc = new DirectoryProgressableCopy();
+            dc.SourcePath = source;
+            dc.DestinationPath = destination;
             dc.CreateDirectory = true;
-            //dc.Overwrite = true;
+            dc.Overwrite = true;
             dc.BytesChanged += (s, e) =>
             {
                 PrintProgress(e);
             };
             dc.Completed += (s, e) =>
             {
-                stopwatch.Stop();
+                sw.Stop();
                 if (e.Successful)
                 {
-                    Console.WriteLine("\r\n\r\nCompleted {0} files | {1} folders | {2} bytes", dc.FileCount, dc.FolderCount, dc.TotalBytes);
-                    Console.WriteLine("Diagnostics: {0} ms", stopwatch.ElapsedMilliseconds);
+                    Console.WriteLine("\r\n\r\nCompleted {0} files | {1} folders", dc.FileCount, dc.FolderCount);
+                    Console.WriteLine("Diagnostics: {0} bytes | {1} ms | {2:F3} MB/s", dc.TotalBytes, sw.ElapsedMilliseconds, ((double)dc.TotalBytes / sw.ElapsedMilliseconds * 1000d / 1024d / 1024d));
                 }
                 else
                 {
@@ -45,28 +58,29 @@ namespace ProgressableCopy
                 Console.CursorVisible = true;
             };
             Console.CursorVisible = false;
-            stopwatch.Start();
+            sw.Start();
             dc.Copy();
         }
 
-        static void SFCopy()
+        static void SFCopy(string source, string destination)
         {
-            var stopwatch = new System.Diagnostics.Stopwatch();
-            sfc.SourcePath = @"C:\test\a_large_file.dat";
-            sfc.DestinationPath = @"Y:\test_test\a_large_file.dat";
+            var sw = new System.Diagnostics.Stopwatch();
+            var sfc = new FileProgressableCopy();
+            sfc.SourcePath = source;
+            sfc.DestinationPath = destination;
             sfc.CreateDirectory = true;
-            //sfc.Overwrite = true;            
+            sfc.Overwrite = true;
             sfc.BytesChanged += (s, e) =>
             {
                 PrintProgress(e);
             };
             sfc.Completed += (s, e) =>
             {
-                stopwatch.Stop();
+                sw.Stop();
                 if (e.Successful)
                 {
-                    Console.WriteLine("\r\n\r\nComplete {0} bytes", sfc.TotalBytes);
-                    Console.WriteLine("Diagnostics: {0} ms", stopwatch.ElapsedMilliseconds);
+                    Console.WriteLine("\r\n\r\nCompleted 1 file");
+                    Console.WriteLine("Diagnostics: {0} bytes | {1} ms | {2:F3} MB/s", sfc.TotalBytes, sw.ElapsedMilliseconds, ((double)sfc.TotalBytes / sw.ElapsedMilliseconds * 1000d / 1024d / 1024d));
                 }
                 else
                 {
@@ -75,7 +89,7 @@ namespace ProgressableCopy
                 Console.CursorVisible = true;
             };
             Console.CursorVisible = false;
-            stopwatch.Start();
+            sw.Start();
             sfc.Copy();            
         }
 
